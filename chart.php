@@ -1,26 +1,56 @@
-$gelombang = Gelombang::orderBy('tanggal', 'asc')->get();
-            $tanggal=[];
-            foreach($gelombang as $g){
-                $tanggal[]=$g->tanggal;
-            }
-            $gelombang1 = peramalan_ho_ts::orderBy('tanggal', 'asc')->get();
-            $tinggi_gelombang=[];
-            $prediksi_hots=[];
-            foreach($gelombang1 as $gg){
-                $tinggi_gelombang[]=$gg->gelombang;
-            $prediksi_hots[]=$gg->prediksi;
-            }
-            $gelombang2 = peramalan_ts_lee::orderBy('tanggal', 'asc')->get();
-            $prediksi_tslee=[];
-            foreach($gelombang2 as $ggg){
-                $prediksi_tslee[]=$ggg->prediksi;
-            }
-            $data_array = [];
-            // dd(count($tanggal));
-            for ($i = 0; $i < count($tanggal); $i++) {
-                $data_array[] = [
-                    'tanggal' => $tanggal[$i],
-                    'gelombang_real'=>$tinggi_gelombang[$i],
-                    'prediksi_hots' => $prediksi_hots[$i],
-                    'prediksi_tslee' => $prediksi_tslee[$i]
-            ];}
+<script>
+        // Mengambil data dari API menggunakan Fetch API
+        fetch('/api') // Ganti URL_API dengan URL sesuai dengan API yang Anda gunakan
+            .then(response => response.json())
+            .then(data => {
+                // Mengambil label tanggal
+                var labels = data.map(item => item.tanggal);
+
+                // Mengambil data gelombang real
+                var gelombangRealData = data.map(item => item.gelombang_real);
+
+                // Mengambil data prediksi HOTimeseries
+                var prediksiHotsData = data.map(item => item.prediksi_hots);
+
+                // Mengambil data prediksi Timeseries Lee
+                var prediksiTsleeData = data.map(item => item.prediksi_tslee);
+
+                // Membuat grafik menggunakan Chart.js
+                var ctx = document.getElementById('lineChart').getContext('2d');
+                var lineChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Gelombang Real',
+                                data: gelombangRealData,
+                                borderColor: 'rgba(255, 206, 86, 1)', // Warna kuning
+                backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                fill: false
+                            },
+                            {
+                                label: 'Prediksi HOTimeseries',
+                                data: prediksiHotsData,
+                                borderColor: 'rgba(255, 99, 132, 1)',
+                                fill: false
+                            },
+                            {
+                                label: 'Prediksi Timeseries Lee',
+                                data: prediksiTsleeData,
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                fill: false
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            });
+    </script>
